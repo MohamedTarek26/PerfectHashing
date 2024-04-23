@@ -1,12 +1,12 @@
 package Hashing;
 
-public class Entity {
+public class Entity<T> {
     public long key;
-    public Object value;
+    public T value;
     public Entity(){
 
     }
-    public Entity(long key,Object value)
+    public Entity(long key,T value)
     {
         this.key=key;
         this.value=value;

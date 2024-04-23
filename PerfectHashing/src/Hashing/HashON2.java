@@ -11,8 +11,8 @@ class HashProvider {
         return ((P * x) % M);
     }
 }
-public class HashON2 {
-    private List<Entity> entities;
+public class HashON2<T> {
+    private List<Entity<T>> entities;
     private int size;
     private int rebuild;
     private int N;
@@ -43,13 +43,13 @@ public class HashON2 {
     }
     public void rehash()
     {
-        List<Entity> oldEntities = entities;
+        List<Entity<T>> oldEntities = entities;
         this.size = 2*size;
         this.calculateN(size);
         this.entities = new ArrayList<>(Collections.nCopies(this.N,null));
         this.rebuild++;
         this.nelements = 0;
-        for(Entity entity:oldEntities)
+        for(Entity<T> entity:oldEntities)
         {
             if(entity!=null)
             {
@@ -57,12 +57,12 @@ public class HashON2 {
             }
         }
     }
-    public boolean put(long key,Object value)
+    public boolean put(long key,T value)
     {
         int index = (int)hashProvider.hash(key) % size;
         if(entities.get(index)==null)
         {
-            entities.set(index,new Entity(key,value));
+            entities.set(index,new Entity<T>(key,value));
             return true;
         } else if (entities.get(index).key == key) {
             System.out.println("Key already exists");
@@ -113,11 +113,11 @@ public class HashON2 {
         }
     }
 
-    public BatchSuceessFailure batchPut(List<Entity> entities)
+    public BatchSuceessFailure batchPut(List<Entity<T>> entities)
     {
         int success = 0;
         int failure = 0;
-        for(Entity entity:entities)
+        for(Entity<T> entity:entities)
         {
             if(put(entity.key,entity.value))
             {
