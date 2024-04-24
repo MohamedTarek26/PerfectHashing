@@ -28,18 +28,41 @@ public class UniversalHash {
         }
         return matrix;
     }
+    // // Method to generate a key for an object
+    // public long generateKey(Object obj) {
+    //     String word = obj.toString();
+    //     //System.out.println("Word: " + word);
+    //     long key = 0L;
+    //     for (int i = 0; i < word.length(); i++) {
+    //         char firstChar = word.charAt(i);
+    //     //   char secondChar = word.charAt(i + 1);
+
+    //         // Combine characters using bit shifting and OR
+    //         key = key << 8; // Left shift by 8 bits
+    //         key |= (long) firstChar << 8 ; // Left shift first char OR with second char
+    //     }
+    //     return key;
+    // }
     // Method to generate a key for an object
     public long generateKey(Object obj) {
         String word = obj.toString();
         //System.out.println("Word: " + word);
+        int offset =0;
+        int indx=(int)Math.ceil(word.length()/8);
+        long[] keys = new long[indx];
         long key = 0L;
-        for (int i = 0; i < word.length(); i++) {
-            char firstChar = word.charAt(i);
-        //   char secondChar = word.charAt(i + 1);
-
-            // Combine characters using bit shifting and OR
-            key = key << 8; // Left shift by 8 bits
-            key |= (long) firstChar << 8 ; // Left shift first char OR with second char
+        for(int j=0;j<indx;j++){
+            // keys[i] = generateKey(word.substring(offset, offset+8));
+            for (int i = 0; i < 8; i++) {
+                char ch = word.charAt(i+offset);                
+                // Combine characters using bit shifting and OR
+                keys[j] = keys[j] << 8; // Left shift by 8 bits
+                keys[j] |= (long) ch << 8 ; // Left shift first char OR with second char
+            }
+            offset+=8;
+        }
+        for(int i=0;i<keys.length;i++){
+            key = key ^ keys[i];
         }
         return key;
     }
