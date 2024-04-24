@@ -111,8 +111,7 @@ private void rehashSecondLevel(int index) {
     private int getSecondLevelHash(int index, T key, int newSize) {
         UniversalHash universalHash = secondLevelHashFunctions.get(index % secondLevelHashFunctions.size());
         long keyHash = universalHash.generateKey(key);
-        int ind = (int) (universalHash.hash(keyHash) % newSize);
-        return ind;
+        return (int) (universalHash.hash(keyHash) % newSize);
 //        return (int) (universalHash.hash(universalHash.generateKey(key)) % newSize);
     }
 
