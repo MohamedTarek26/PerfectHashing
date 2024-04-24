@@ -1,58 +1,55 @@
 package Hashing;
 
-
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-public class HashON<T> implements Hashing {
+public class HashON<T> implements Hashing<T> {
 
+    public static final int CAPACITY = 5;
 
-    private int capacity;
+    private final int capacity;
     public int size;
-//    private int rebuild;
     private int hashCount;
+
+    private UniversalHash firstLevelHashFunction;
     private List<T>[] firstLevelTable;
     private List<T>[] secondLevelTable;
-//    private HashProvider hashProvider = new HashProvider();
-//    private UniversalHashing universalHashing = new UniversalHashing();
-    private List<HashFunction> secondLevelHashFunctions;
+    private List<UniversalHash> secondLevelHashFunctions;
 
-    public HashON(int capacity) {
-        this.capacity = capacity;
+    public HashON() {
+        this.capacity = CAPACITY;
         this.size = 0;
-//        this.rebuild = 0;
         this.hashCount = 0;
         this.firstLevelTable = new List[capacity];
+        this.firstLevelHashFunction = new UniversalHash(capacity);
         this.secondLevelTable = new List[capacity];
         this.secondLevelHashFunctions = new ArrayList<>();
         for (int i = 0; i < capacity; i++) {
             this.firstLevelTable[i] = new ArrayList<>();
             this.secondLevelTable[i] = new ArrayList<>();
-            this.secondLevelHashFunctions.add(new HashFunction());
+            this.secondLevelHashFunctions.add(new UniversalHash(1));
         }
     }
 
     @Override
-    public boolean insert(Object key) {
+    public boolean insert(T key) {
         int index = firstLevelHash(key);
         this.hashCount++;
         if (firstLevelTable[index].contains(key)) {
             return false;
         }
-        firstLevelTable[index].add((T) key);
-        secondLevelTable[index].add((T) key);
+        firstLevelTable[index].add(key);
+        secondLevelTable[index].add(key);
         this.size++;
-        if(this.size >= capacity) {
+        if (firstLevelTable[index].size() > 1) {
             rehashSecondLevel(index);
         }
         return true;
-
     }
 
     @Override
-    public boolean delete(Object key) {
+    public boolean delete(T key) {
         int index = firstLevelHash(key);
         this.hashCount++;
         if (firstLevelTable[index].contains(key)) {
@@ -64,68 +61,59 @@ public class HashON<T> implements Hashing {
     }
 
     @Override
-    public boolean search(Object key) {
-        int index = firstLevelHash(key);
+    public boolean search(T key) {
+        int firstLevelIndex = firstLevelHash(key);
         this.hashCount++;
-        return containsKeyInFirstLevel(index, (T) key);
-    }
-    private boolean containsKeyInFirstLevel(int index, T key) {
-        for (T element : firstLevelTable[index]) {
-            if (element.equals(key)) {
-                return true;
-            }
+        if(firstLevelTable[firstLevelIndex].isEmpty()) {
+            return false;
         }
-        return false;
+        int secondLevelIndex = getSecondLevelHash(firstLevelIndex, key, secondLevelTable[firstLevelIndex].size());
+        return secondLevelTable[firstLevelIndex].get(secondLevelIndex) != null &&
+               secondLevelTable[firstLevelIndex].get(secondLevelIndex).equals(key);
     }
 
-    private int firstLevelHash(Object key) {
-        return Math.abs(key.hashCode()) % capacity;
+    @Override
+    public BatchSuceessFailure batchDelete(List<Entity<T>> entities){
+        return null;
     }
 
-    private void rehashSecondLevel(int index) {
-        int newSize = secondLevelTable[index].size() * secondLevelTable[index].size();
-        List<T> newTable = new ArrayList<>(Collections.nCopies(newSize, null));
+    @Override
+    public BatchSuceessFailure batchInsert(List<Entity<T>> entities){
+        return null;
+    }
 
-        for (T key : secondLevelTable[index]) {
-            if (key == null) {
-                continue;
-            }
-            int newIndex = getSecondLevelHash(index, key, newSize);
+    private int firstLevelHash(T key) {
+        return (int) (firstLevelHashFunction.hash(firstLevelHashFunction.generateKey(key)) % capacity);
+    }
 
-            if (newTable.get(newIndex) != null) {
-                secondLevelHashFunctions.set(index, new HashFunction());
-                rehashSecondLevel(index);
-                return;
-            }
+private void rehashSecondLevel(int index) {
+    int newSize = firstLevelTable[index].size() * firstLevelTable[index].size();
+    List<T> newTable = new ArrayList<>(Collections.nCopies(newSize, null));
 
-            newTable.set(newIndex, key);
+    for (T key : firstLevelTable[index]) {
+        if (key == null) {
+            continue;
+        }
+        int newIndex = getSecondLevelHash(index, key, newSize);
+
+        if (newTable.get(newIndex) != null) {
+            secondLevelHashFunctions.set(index, new UniversalHash(newSize));
+            rehashSecondLevel(index);
+            return;
         }
 
-        // Replace the second-level table for the index with newTable
-        secondLevelTable[index] = newTable;
+        newTable.set(newIndex, key);
     }
+
+    secondLevelTable[index] = newTable;
+}
 
     private int getSecondLevelHash(int index, T key, int newSize) {
-        HashFunction hashFunction = secondLevelHashFunctions.get(index % secondLevelHashFunctions.size());
-        return Math.abs(hashFunction.hash(key)) % newSize;
+        UniversalHash universalHash = secondLevelHashFunctions.get(index % secondLevelHashFunctions.size());
+        long keyHash = universalHash.generateKey(key);
+        int ind = (int) (universalHash.hash(keyHash) % newSize);
+        return ind;
+//        return (int) (universalHash.hash(universalHash.generateKey(key)) % newSize);
     }
-    @Override
-    public BatchSuceessFailure batchInsert(String[] keys) {
-        return null;
-    }
-
-    @Override
-    public BatchSuceessFailure batchDelete(String[] keys) {
-        return null;
-    }
-
 
 }
-
-class HashFunction {
-    public int hash(Object key) {
-        // Implement your hash function here
-        return Math.abs(key.hashCode());
-    }
-}
-

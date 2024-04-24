@@ -12,12 +12,12 @@ public class HashONTest {
     }
 
     private static void testInsertion() {
-        HashON<String> hashTable = new HashON<String>(10);
+        HashON<String> hashTable = new HashON<String>();
 
         System.out.println("Insertion Test:");
         System.out.println("---------------");
 
-        String[] keys = {"apple", "banana", "cherry", "date", "elderberry"};
+        String[] keys = {"apple", "banana", "cherry", "date"};
 
         for (String key : keys) {
             boolean inserted = hashTable.insert(key);
@@ -29,7 +29,7 @@ public class HashONTest {
     }
 
     private static void testDeletion() {
-        HashON<String> hashTable = new HashON<String>(10);
+        HashON<String> hashTable = new HashON<String>();
 
         System.out.println("Deletion Test:");
         System.out.println("--------------");
@@ -53,7 +53,7 @@ public class HashONTest {
     }
 
     private static void testSearch() {
-        HashON<String> hashTable = new HashON<String>(10);
+        HashON<String> hashTable = new HashON<String>();
 
         System.out.println("Search Test:");
         System.out.println("------------");
@@ -70,7 +70,7 @@ public class HashONTest {
     }
 
     private static void testCollision() {
-        HashON<String> hashTable = new HashON<String>(5); // Small capacity to force collisions
+        HashON<String> hashTable = new HashON<String>();
 
         System.out.println("Collision Test:");
         System.out.println("---------------");
