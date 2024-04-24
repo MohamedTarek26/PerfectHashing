@@ -6,27 +6,29 @@ import java.util.List;
 
 public class HashON2<T> implements Hashing<T>{
     private List<Entity<T>> entities;
-    private int size;
+    private long size;
     private int rebuild;
     private int N;
-
+    private int batchinsertfirsttime=0;
+    private long batchsize=0;
     private int b;
-    private int nelements;
+    private long nelements;
 
     private UniversalHash hashProvider;
 
     public HashON2()
     {
-        this.size = 3;
+        this.size = 100;
         this.rebuild = 0;
         //calculate number of bits required to represent size*size
         this.calculateN(size);
+        //set entities to null
         this.entities=new ArrayList<>(Collections.nCopies(this.N,null));
         this.nelements = 0;
         this.hashProvider = new UniversalHash(this.N);
     }
 
-    private void calculateN(int size)
+    private void calculateN(long size)
     {
         int i = 1;
         while (i < size*size) {
@@ -38,10 +40,13 @@ public class HashON2<T> implements Hashing<T>{
     private void rehash()
     {
         List<Entity<T>> oldEntities = entities;
-        this.size = 2*size;
         this.calculateN(size);
         this.hashProvider = new UniversalHash(this.N);
-        this.entities = new ArrayList<>(Collections.nCopies(this.N,null));
+        //set entities to null
+        for(int i=0;i<this.N;i++)
+        {
+            entities.set(i,null);
+        }
         this.rebuild++;
         this.nelements = 0;
         for(Entity<T> entity:oldEntities)
@@ -115,6 +120,13 @@ public class HashON2<T> implements Hashing<T>{
 
     public BatchSuceessFailure batchInsert(List<Entity<T>> entities)
     {
+        this.batchsize=entities.size();
+        if(nelements+entities.size()>this.N)
+        {
+            this.size = this.size+entities.size();
+        }
+        System.out.println("Batch size: "+batchsize);
+        this.batchinsertfirsttime=1;
         int success = 0;
         int failure = 0;
         for(Entity<T> entity:entities)
@@ -127,6 +139,7 @@ public class HashON2<T> implements Hashing<T>{
             {
                 failure++;
             }
+            batchinsertfirsttime=0;
         }
         return new BatchSuceessFailure(success,failure);
     }
@@ -166,7 +179,7 @@ public class HashON2<T> implements Hashing<T>{
         return N;
     }
 
-    public int getNelements() {
+    public long getNelements() {
         return nelements;
     }
 
