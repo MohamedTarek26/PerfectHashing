@@ -28,20 +28,20 @@ public class UniversalHash {
         }
         return matrix;
     }
-    // Method to generate a fingerprint for an object
-    public long generateFingerprint(Object obj) {
+    // Method to generate a key for an object
+    public long generateKey(Object obj) {
         String word = obj.toString();
         //System.out.println("Word: " + word);
-        long fingerprint = 0L;
+        long key = 0L;
         for (int i = 0; i < word.length(); i++) {
             char firstChar = word.charAt(i);
         //   char secondChar = word.charAt(i + 1);
 
             // Combine characters using bit shifting and OR
-            fingerprint = fingerprint << 8; // Left shift by 8 bits
-            fingerprint |= (long) firstChar << 8 ; // Left shift first char OR with second char
+            key = key << 8; // Left shift by 8 bits
+            key |= (long) firstChar << 8 ; // Left shift first char OR with second char
         }
-        return fingerprint;
+        return key;
     }
     // Method to convert a long integer to a boolean array
     // Method to hash a key using matrix multiplication modulo 2
