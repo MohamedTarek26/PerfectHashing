@@ -54,6 +54,9 @@ public class UniversalHash {
         for (int j = 0; j < indx; j++) {
             // keys[i] = generateKey(word.substring(offset, offset+8));
             for (int i = 0; i < 8 && i + offset < word.length(); i++) {
+                if(i+offset>=word.length()){
+                    break;
+                }
                 char ch = word.charAt(i + offset);
                 // Combine characters using bit shifting and OR
                 keys[j] = keys[j] << 8; // Left shift by 8 bits
