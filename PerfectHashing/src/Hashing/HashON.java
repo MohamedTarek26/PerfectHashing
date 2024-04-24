@@ -6,7 +6,7 @@ import java.util.List;
 
 public class HashON<T> implements Hashing<T> {
 
-    public static final int CAPACITY = 5;
+    public static final int CAPACITY = 200000;
 
     private final int capacity;
     public int size;
@@ -73,14 +73,40 @@ public boolean delete(T key) {
                secondLevelTable[firstLevelIndex].get(secondLevelIndex).equals(key);
     }
 
-    @Override
-    public BatchSuceessFailure batchDelete(List<Entity<T>> entities){
-        return null;
+    public BatchSuceessFailure batchInsert(List<Entity<T>> entities)
+    {
+        int success = 0;
+        int failure = 0;
+        for(Entity<T> entity:entities)
+        {
+            if(insert(entity.value))
+            {
+                success++;
+            }
+            else
+            {
+                failure++;
+            }
+        }
+        return new BatchSuceessFailure(success,failure);
     }
 
-    @Override
-    public BatchSuceessFailure batchInsert(List<Entity<T>> entities){
-        return null;
+    public BatchSuceessFailure batchDelete(List<Entity<T>> entities)
+    {
+        int success = 0;
+        int failure = 0;
+        for(Entity<T> entity:entities)
+        {
+            if(delete(entity.value))
+            {
+                success++;
+            }
+            else
+            {
+                failure++;
+            }
+        }
+        return new BatchSuceessFailure(success,failure);
     }
 
     private int firstLevelHash(T key) {
