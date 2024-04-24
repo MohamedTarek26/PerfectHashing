@@ -47,21 +47,21 @@ public class UniversalHash {
     public long generateKey(Object obj) {
         String word = obj.toString();
         //System.out.println("Word: " + word);
-        int offset =0;
-        int indx=(int)Math.ceil(word.length()/8);
+        int offset = 0;
+        int indx = (int) Math.ceil(word.length() / 8.0);
         long[] keys = new long[indx];
         long key = 0L;
-        for(int j=0;j<indx;j++){
+        for (int j = 0; j < indx; j++) {
             // keys[i] = generateKey(word.substring(offset, offset+8));
-            for (int i = 0; i < 8; i++) {
-                char ch = word.charAt(i+offset);                
+            for (int i = 0; i < 8 && i + offset < word.length(); i++) {
+                char ch = word.charAt(i + offset);
                 // Combine characters using bit shifting and OR
                 keys[j] = keys[j] << 8; // Left shift by 8 bits
-                keys[j] |= (long) ch << 8 ; // Left shift first char OR with second char
+                keys[j] |= (long) ch;   // OR with the current character
             }
-            offset+=8;
+            offset += 8;
         }
-        for(int i=0;i<keys.length;i++){
+        for (int i = 0; i < keys.length; i++) {
             key = key ^ keys[i];
         }
         return key;
