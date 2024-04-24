@@ -43,14 +43,16 @@ public class UniversalHash {
         }
         return fingerprint;
     }
+    // Method to convert a long integer to a boolean array
     // Method to hash a key using matrix multiplication modulo 2
-    public long hash(byte[] key) {
+    public long hash(long key) {
+        boolean[] keyBytes = longToBitArray(key);
         byte[] hashBytes = new byte[hashMatrix.length];
         long hashValue = 0;
         // //System.out.println("Key: "+key);
         for (int i = 0; i < hashMatrix.length; i++) {
-            for (int j = 0; j < key.length; j++) {
-                hashBytes[i] ^= (hashMatrix[i][j] && ((key[j] & 1) == 1)) ? 1 : 0; // Bitwise AND and XOR for modulo 2
+            for (int j = 0; j < keyBytes.length; j++) {
+                hashBytes[i] ^= (hashMatrix[i][j] && keyBytes[j])  ? 1 : 0; // Bitwise AND and XOR for modulo 2
             }
             // //System.out.println("HashBytes: "+hashBytes[i]);
         }
@@ -62,6 +64,16 @@ public class UniversalHash {
         hashValue= Long.parseLong(binaryString, 2);
         //System.out.println("HashValue: "+hashValue);
         return hashValue % tableSize; // Reduce to valid hash table index
+    }
+    public static boolean[] longToBitArray(long number) {
+        boolean[] bitArray = new boolean[64];
+
+        // Extract each bit of the long number and store it in the bit array
+        for (int i = 63; i >= 0; i--) {
+            bitArray[i] = ((number >> i) & 1) == 1;
+        }
+
+        return bitArray;
     }
     // Method to convert a byte array to a binary string
     public String byteArrayToBinaryString(byte[] bytes) {
