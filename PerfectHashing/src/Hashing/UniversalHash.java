@@ -46,26 +46,27 @@ public class UniversalHash {
     // Method to convert a long integer to a boolean array
     // Method to hash a key using matrix multiplication modulo 2
     public long hash(long key) {
-        boolean[] keyBytes = longToBitArray(key);
-        byte[] hashBytes = new byte[hashMatrix.length];
+        boolean[] keyBits = longToBitArray(key);
+        boolean[] hashBits = new boolean[hashMatrix.length];
         long hashValue = 0;
         // //System.out.println("Key: "+key);
         for (int i = 0; i < hashMatrix.length; i++) {
-            for (int j = 0; j < keyBytes.length; j++) {
-                hashBytes[i] ^= (hashMatrix[i][j] && keyBytes[j])  ? 1 : 0; // Bitwise AND and XOR for modulo 2
+            for (int j = 0; j < keyBits.length; j++) {
+                hashBits[i] ^= (hashMatrix[i][j] && keyBits[j])  ? true : false; // Bitwise AND and XOR for modulo 2
             }
-            // //System.out.println("HashBytes: "+hashBytes[i]);
+            // //System.out.println("hashBits: "+hashBits[i]);
         }
-        // //System.out.println("HashBytes length: "+hashBytes.length);
+        // //System.out.println("hashBits length: "+hashBits.length);
         // Convert the byte array to a binary string
-        String binaryString = byteArrayToBinaryString(hashBytes);
-        //System.out.println("HashBytes String: "+binaryString);
+        // String binaryString = byteArrayToBinaryString(hashBits);
+        //System.out.println("hashBits String: "+binaryString);
         // Parse the binary string as a long value
-        hashValue= Long.parseLong(binaryString, 2);
+        // hashValue= Long.parseLong(binaryString, 2);
+        hashValue = bitArrayToLong(hashBits);
         //System.out.println("HashValue: "+hashValue);
         return hashValue % tableSize; // Reduce to valid hash table index
     }
-    public static boolean[] longToBitArray(long number) {
+    public boolean[] longToBitArray(long number) {
         boolean[] bitArray = new boolean[64];
 
         // Extract each bit of the long number and store it in the bit array
@@ -75,16 +76,27 @@ public class UniversalHash {
 
         return bitArray;
     }
-    // Method to convert a byte array to a binary string
-    public String byteArrayToBinaryString(byte[] bytes) {
-        StringBuilder binary = new StringBuilder();
-        for (byte b : bytes) {
-            int val = b;
-            binary.append((val) == 0 ? 0 : 1);
-            val <<= 1;
+    // Method to convert a bit array to a long integer
+    public long bitArrayToLong(boolean[] bitArray) {
+        long number = 0;
+
+        // Convert the bit array to a long number
+        for (int i = 0; i < bitArray.length; i++) {
+            number = (number << 1) | (bitArray[i] ? 1 : 0);
         }
-        return binary.toString();
+
+        return number;
     }
+    // // Method to convert a byte array to a binary string
+    // public String byteArrayToBinaryString(byte[] bytes) {
+    //     StringBuilder binary = new StringBuilder();
+    //     for (byte b : bytes) {
+    //         int val = b;
+    //         binary.append((val) == 0 ? 0 : 1);
+    //         val <<= 1;
+    //     }
+    //     return binary.toString();
+    // }
     // Method to print the binary representation of a long integer
     public static void printBinary(long number) {
         String binary = Long.toBinaryString(number);
