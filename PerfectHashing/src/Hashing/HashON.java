@@ -48,17 +48,18 @@ public class HashON<T> implements Hashing<T> {
         return true;
     }
 
-    @Override
-    public boolean delete(T key) {
-        int index = firstLevelHash(key);
-        this.hashCount++;
-        if (firstLevelTable[index].contains(key)) {
-            firstLevelTable[index].remove(key);
-            this.size--;
-            return true;
-        }
-        return false;
+@Override
+public boolean delete(T key) {
+    int index = firstLevelHash(key);
+    this.hashCount++;
+    if (firstLevelTable[index].contains(key)) {
+        firstLevelTable[index].remove(key);
+        secondLevelTable[index].remove(key);
+        this.size--;
+        return true;
     }
+    return false;
+}
 
     @Override
     public boolean search(T key) {
