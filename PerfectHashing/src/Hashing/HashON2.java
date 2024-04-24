@@ -4,7 +4,7 @@ import java.util.Collections;
 import java.util.List;
 
 
-public class HashON2<T> implements Hashing{
+public class HashON2<T> implements Hashing<T>{
     private List<Entity<T>> entities;
     private int size;
     private int rebuild;
