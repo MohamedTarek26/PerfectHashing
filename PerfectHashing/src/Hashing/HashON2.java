@@ -3,15 +3,8 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-class HashProvider {
-    private static final long P = 73856093;
-    private static final long M = 1000000007;
 
-    public long hash(long x) {
-        return ((P * x) % M);
-    }
-}
-public class HashON2<T> {
+public class HashON2<T> implements Hashing{
     private List<Entity<T>> entities;
     private int size;
     private int rebuild;
@@ -20,7 +13,7 @@ public class HashON2<T> {
     private int b;
     private int nelements;
 
-    private HashProvider hashProvider = new HashProvider();
+    private UniversalHash hashProvider;
 
     public HashON2()
     {
@@ -30,6 +23,7 @@ public class HashON2<T> {
         this.calculateN(size);
         this.entities=new ArrayList<>(Collections.nCopies(this.N,null));
         this.nelements = 0;
+        this.hashProvider = new UniversalHash(this.N);
     }
 
     private void calculateN(int size)
@@ -41,11 +35,12 @@ public class HashON2<T> {
         }
         this.N = i;
     }
-    public void rehash()
+    private void rehash()
     {
         List<Entity<T>> oldEntities = entities;
         this.size = 2*size;
         this.calculateN(size);
+        this.hashProvider = new UniversalHash(this.N);
         this.entities = new ArrayList<>(Collections.nCopies(this.N,null));
         this.rebuild++;
         this.nelements = 0;
@@ -53,13 +48,16 @@ public class HashON2<T> {
         {
             if(entity!=null)
             {
-                put(entity.key,entity.value);
+                insert(entity.value);
             }
         }
     }
-    public boolean put(long key,T value)
+
+    public boolean insert(T value)
     {
-        int index = (int)hashProvider.hash(key) % size;
+        long key = hashProvider.generateKey(value);
+        System.out.println("Key: "+key);
+        int index = this.calcIndex(key);
         if(entities.get(index)==null)
         {
             entities.set(index,new Entity<T>(key,value));
@@ -70,13 +68,14 @@ public class HashON2<T> {
         } else
         {
             this.rehash();
-            return put(key,value);
+            return insert(value);
         }
     }
 
-    public boolean remove(long key)
+    public boolean delete(T value)
     {
-        int index = (int)hashProvider.hash(key) % size;
+        long key = hashProvider.generateKey(value);
+        int index = this.calcIndex(key);
         if(entities.get(index)==null)
         {
             System.out.println("Key does not exist");
@@ -94,32 +93,33 @@ public class HashON2<T> {
         }
     }
 
-    public Object get(long key)
+    public boolean search(T value)
     {
-        int index = (int)hashProvider.hash(key) % size;
+        long key = hashProvider.generateKey(value);
+        int index = this.calcIndex(key);
         if(entities.get(index)==null)
         {
             System.out.println("Key does not exist");
-            return null;
+            return false;
         }
         else if(entities.get(index).key==key)
         {
-            return entities.get(index).value;
+            return true;
         }
         else
         {
             System.out.println("Key does not exist");
-            return null;
+            return false;
         }
     }
 
-    public BatchSuceessFailure batchPut(List<Entity<T>> entities)
+    public BatchSuceessFailure batchInsert(List<Entity<T>> entities)
     {
         int success = 0;
         int failure = 0;
         for(Entity<T> entity:entities)
         {
-            if(put(entity.key,entity.value))
+            if(insert(entity.value))
             {
                 success++;
             }
@@ -131,13 +131,13 @@ public class HashON2<T> {
         return new BatchSuceessFailure(success,failure);
     }
 
-    public BatchSuceessFailure batchRemove(List<Long> keys)
+    public BatchSuceessFailure batchDelete(List<Entity<T>> entities)
     {
         int success = 0;
         int failure = 0;
-        for(Long key:keys)
+        for(Entity<T> entity:entities)
         {
-            if(remove(key))
+            if(delete(entity.value))
             {
                 success++;
             }
@@ -148,6 +148,11 @@ public class HashON2<T> {
         }
         return new BatchSuceessFailure(success,failure);
     }
+    private int calcIndex(long key)
+    {
+        return (int)hashProvider.hash(key);
+    }
+
 
     public int getRebuilds() {
         return rebuild;
