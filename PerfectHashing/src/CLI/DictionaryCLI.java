@@ -5,6 +5,8 @@ import java.io.IOException;
 import java.util.Scanner;
 
 import Dictionary.EnglishDictionary;
+import Hashing.BatchSuceessFailure;
+
 public class DictionaryCLI {
 
     private EnglishDictionary dictionary;
@@ -15,7 +17,7 @@ public class DictionaryCLI {
 
     public void run(){
 
-        System.out.print("Enter the type of the backend tree: ");
+        System.out.print("Enter the type of the backend tree: (N or N2)");
         String hashType = scanner.nextLine();
         dictionary = new EnglishDictionary(hashType);
         menu();
@@ -37,14 +39,21 @@ public class DictionaryCLI {
             case 1 -> {
                 System.out.print("Enter a string to insert:");
                 key = scanner.nextLine();
-                dictionary.insert(key);
-                System.out.println("Inserted: " + key);
+                if(dictionary.insert(key)){
+                    System.out.println("Inserted: " + key);
+                }else{
+                    System.out.println("Key already exists");
+                }
+
             }
             case 2 -> {
                 System.out.print("Enter a string to delete:");
                 key = scanner.nextLine();
-                dictionary.delete(key);
-                System.out.println("Deleted: " + key);
+                if(dictionary.delete(key)){
+                    System.out.println("Deleted: " + key);
+                }else{
+                    System.out.println("Key already exists");
+                }
             }
             case 3 -> {
                 System.out.print("Enter a string to search:");
@@ -58,14 +67,25 @@ public class DictionaryCLI {
             case 4 -> {
                 System.out.print("Enter the file path for batch insert:");
                 filePath = scanner.nextLine();
-                dictionary.batchInsert(filePath);
-                System.out.println("Batch insert completed.");
+                try {
+                    BatchSuceessFailure successFailure = dictionary.batchInsert(filePath);
+                    System.out.println("Batch insert completed. Added "+successFailure.getSuccess() + " ---- Duplicates " + successFailure.getFailure());
+                }
+                catch (IOException ex){
+                    System.out.println("Failed to load file");
+                }
+
             }
             case 5 -> {
                 System.out.print("Enter the file path for batch delete:");
                 filePath = scanner.nextLine();
-                dictionary.batchDelete(filePath);
-                System.out.println("Batch delete completed.");
+                try {
+                    BatchSuceessFailure successFailure = dictionary.batchDelete(filePath);
+                    System.out.println("Batch delete completed. Deleted : "+successFailure.getSuccess() + " ---- Non existing : " + successFailure.getFailure());
+                }
+                catch (IOException ex){
+                    System.out.println("Failed to load file");
+                }
             }
             case 6 -> {
                 System.out.print("Exiting...");
